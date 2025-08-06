@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Accordion Hologram Selector - All Open & Clean</title>
+<title>Mixed RotateX & RotateY Hologram</title>
 <style>
   body {
     background: #111;
@@ -16,7 +16,6 @@
     margin-bottom: 1rem;
   }
 
-  /* 아코디언 컨테이너 */
   .accordion {
     width: 320px;
     border-radius: 8px;
@@ -25,35 +24,22 @@
     background: #222;
   }
 
-  /* 아코디언 헤더 */
   .accordion-header {
     padding: 12px 20px;
     background: #333;
-    cursor: pointer;
-    user-select: none;
     font-weight: 600;
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  .accordion-header:hover {
-    background: #00adb5;
-    color: black;
+    user-select: none;
+    cursor: default;
   }
 
-  /* 아이콘 (숨김) */
-  .accordion-header::after {
-    content: "";
-  }
-
-  /* 아코디언 콘텐츠 */
   .accordion-content {
-    max-height: none !important;  /* 항상 펼쳐진 상태 */
-    overflow: visible !important;
+    max-height: none;
     background: #1a1a1a;
   }
 
-  /* 리스트 아이템 */
   .item {
     padding: 10px 20px;
     border-bottom: 1px solid #444;
@@ -69,7 +55,6 @@
     font-weight: bold;
   }
 
-  /* 홀로그램 3x3 그리드 */
   .grid-container {
     perspective: 1000px;
   }
@@ -83,7 +68,7 @@
   .cell {
     width: 100px;
     height: 100px;
-    background: transparent;  /* 배경 없애기 */
+    background: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -95,40 +80,36 @@
     height: 80px;
     position: relative;
     transform-style: preserve-3d;
+    animation: rotateXAnim 4s linear infinite;
   }
-  .front, .back {
-    position: absolute;
+  .rotateY {
+    animation: rotateYAnim 4s linear infinite !important;
+  }
+  @keyframes rotateXAnim {
+    from { transform: rotateX(0deg); }
+    to { transform: rotateX(360deg); }
+  }
+  @keyframes rotateYAnim {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+  }
+  .front {
     width: 100%;
     height: 100%;
     border-radius: 8px;
-    backface-visibility: hidden;
   }
   .front img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    box-shadow: 0 0 10px #00adb5cc;
     border-radius: 8px;
+    box-shadow: 0 0 10px #00adb5cc;
+    transform-origin: center;
   }
-  .back {
-    display: none; /* 뒤판 숨기기 */
-  }
-
-  /* 회전 애니메이션 */
-  @keyframes rotateFront {
-    from { transform: rotateY(0deg); }
-    to { transform: rotateY(360deg); }
-  }
-
-  /* 각 칸별 초기 각도 */
-  .deg0   { animation: rotateFront 4s linear infinite; }
-  .deg90  { animation: rotateFront 4s linear infinite; animation-delay: -1s; }
-  .deg180 { animation: rotateFront 4s linear infinite; animation-delay: -2s; }
-  .deg270 { animation: rotateFront 4s linear infinite; animation-delay: -3s; }
 </style>
 </head>
 <body>
-<h2>Accordion Hologram Selector - Always Open</h2>
+<h2>Mixed RotateX & RotateY Hologram</h2>
 
 <div class="accordion">
   <div class="accordion-header">Select Item</div>
@@ -168,13 +149,22 @@
     8: document.getElementById("cell8")
   };
 
-  // 리스트 만들기
+  const startRotateDegrees = {
+    2: 0,
+    4: 270,
+    6: 90,
+    8: 180
+  };
+
+  function isRotateYCell(key) {
+    return key === "4" || key === "6";
+  }
+
   items.forEach(name => {
     const div = document.createElement('div');
     div.className = 'item';
     div.textContent = name;
     div.onclick = () => {
-      // 선택 표시 토글
       document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
       div.classList.add('selected');
       showInHologram(name);
@@ -182,38 +172,35 @@
     accordionContent.appendChild(div);
   });
 
-  // 이름 → 파일명
   function nameToFilename(name) {
-    return name.toLowerCase().replace(/\s+/g, "") + ".png";
+    return name.toLowerCase().replace(/\s+/g, '') + '.png';
   }
-
-  // 홀로그램 표시
-  const degClasses = {2:"deg0",4:"deg270",6:"deg90",8:"deg180"};
 
   function showInHologram(name) {
     const filename = nameToFilename(name);
     const src = `image/${filename}`;
 
     Object.entries(holoGridCells).forEach(([key, cell]) => {
-      cell.innerHTML = "";
+      cell.innerHTML = '';
 
       const wrap = document.createElement('div');
       wrap.className = 'img-wrap';
 
+      // 4,6번 셀은 rotateY 애니메이션
+      if (isRotateYCell(key)) {
+        wrap.classList.add('rotateY');
+      }
+
       const front = document.createElement('div');
-      front.className = `front ${degClasses[key]}`;
+      front.className = 'front';
 
       const img = document.createElement('img');
       img.src = src;
       img.alt = name;
+      img.style.transform = `rotate(${startRotateDegrees[key]}deg)`;
 
       front.appendChild(img);
-
-      const back = document.createElement('div');
-      back.className = 'back';
-
       wrap.appendChild(front);
-      wrap.appendChild(back);
       cell.appendChild(wrap);
     });
   }
