@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Accordion Hologram Selector</title>
+<title>Accordion Hologram Selector - All Open & Clean</title>
 <style>
   body {
     background: #111;
@@ -20,7 +20,6 @@
   .accordion {
     width: 320px;
     border-radius: 8px;
-    overflow: hidden;
     box-shadow: 0 0 15px #00adb5aa;
     margin-bottom: 2rem;
     background: #222;
@@ -42,22 +41,16 @@
     color: black;
   }
 
-  /* 아이콘 */
+  /* 아이콘 (숨김) */
   .accordion-header::after {
-    content: "▼";
-    font-size: 0.7rem;
-    transition: transform 0.3s ease;
-  }
-  .accordion-header.active::after {
-    transform: rotate(-180deg);
+    content: "";
   }
 
   /* 아코디언 콘텐츠 */
   .accordion-content {
-    max-height: 0;
-    overflow: hidden;
+    max-height: none !important;  /* 항상 펼쳐진 상태 */
+    overflow: visible !important;
     background: #1a1a1a;
-    transition: max-height 0.4s ease;
   }
 
   /* 리스트 아이템 */
@@ -90,7 +83,7 @@
   .cell {
     width: 100px;
     height: 100px;
-    background: rgba(255,255,255,0.05);
+    background: transparent;  /* 배경 없애기 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -118,10 +111,7 @@
     border-radius: 8px;
   }
   .back {
-    background: rgba(0, 173, 181, 0.2);
-    border: 1px solid #00adb5b3;
-    top: 0; left: 0;
-    transform: rotateY(0deg);
+    display: none; /* 뒤판 숨기기 */
   }
 
   /* 회전 애니메이션 */
@@ -138,8 +128,7 @@
 </style>
 </head>
 <body>
-
-<h2>Accordion Hologram Selector</h2>
+<h2>Accordion Hologram Selector - Always Open</h2>
 
 <div class="accordion">
   <div class="accordion-header">Select Item</div>
@@ -171,7 +160,6 @@
     "Sugar Apple", "Burning Bud", "Giant Pinecone"
   ];
 
-  const accordionHeader = document.querySelector('.accordion-header');
   const accordionContent = document.getElementById('accordionContent');
   const holoGridCells = {
     2: document.getElementById("cell2"),
@@ -179,16 +167,6 @@
     6: document.getElementById("cell6"),
     8: document.getElementById("cell8")
   };
-
-  // 아코디언 토글
-  accordionHeader.addEventListener('click', () => {
-    const isOpen = accordionHeader.classList.toggle('active');
-    if (isOpen) {
-      accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
-    } else {
-      accordionContent.style.maxHeight = null;
-    }
-  });
 
   // 리스트 만들기
   items.forEach(name => {
@@ -200,9 +178,6 @@
       document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
       div.classList.add('selected');
       showInHologram(name);
-      // 아코디언 닫기
-      accordionHeader.classList.remove('active');
-      accordionContent.style.maxHeight = null;
     };
     accordionContent.appendChild(div);
   });
