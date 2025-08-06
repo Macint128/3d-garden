@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Mixed RotateX & RotateY Hologram</title>
+<title>Mirror Direction Hologram Clean</title>
 <style>
   body {
     background: #111;
@@ -19,7 +19,7 @@
   .accordion {
     width: 320px;
     border-radius: 8px;
-    box-shadow: 0 0 15px #00adb5aa;
+    box-shadow: 0 0 10px #007f7f99; /* 살짝 어두운 민트 톤? */
     margin-bottom: 2rem;
     background: #222;
   }
@@ -50,7 +50,7 @@
     background: #333;
   }
   .item.selected {
-    background: #00adb5;
+    background: #00adb5; /* 살짝 민트지만 너무 튀면 조절 가능 */
     color: black;
     font-weight: bold;
   }
@@ -68,7 +68,7 @@
   .cell {
     width: 100px;
     height: 100px;
-    background: transparent;
+    background: transparent; /* 아우라 배경 제거 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -80,19 +80,45 @@
     height: 80px;
     position: relative;
     transform-style: preserve-3d;
-    animation: rotateXAnim 4s linear infinite;
+    animation-duration: 4s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
   }
-  .rotateY {
-    animation: rotateYAnim 4s linear infinite !important;
+
+  /* X축 시계방향 */
+  .rotateX-cw {
+    animation-name: rotateXAnimCW;
   }
-  @keyframes rotateXAnim {
+  /* X축 반시계방향 */
+  .rotateX-ccw {
+    animation-name: rotateXAnimCCW;
+  }
+  /* Y축 시계방향 */
+  .rotateY-cw {
+    animation-name: rotateYAnimCW;
+  }
+  /* Y축 반시계방향 */
+  .rotateY-ccw {
+    animation-name: rotateYAnimCCW;
+  }
+
+  @keyframes rotateXAnimCW {
     from { transform: rotateX(0deg); }
     to { transform: rotateX(360deg); }
   }
-  @keyframes rotateYAnim {
+  @keyframes rotateXAnimCCW {
+    from { transform: rotateX(0deg); }
+    to { transform: rotateX(-360deg); }
+  }
+  @keyframes rotateYAnimCW {
     from { transform: rotateY(0deg); }
     to { transform: rotateY(360deg); }
   }
+  @keyframes rotateYAnimCCW {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(-360deg); }
+  }
+
   .front {
     width: 100%;
     height: 100%;
@@ -103,13 +129,14 @@
     height: 100%;
     object-fit: cover;
     border-radius: 8px;
-    box-shadow: 0 0 10px #00adb5cc;
+    /* 아우라 대신 은은한 그림자 */
+    box-shadow: 0 0 8px rgba(0, 173, 181, 0.3);
     transform-origin: center;
   }
 </style>
 </head>
 <body>
-<h2>Mixed RotateX & RotateY Hologram</h2>
+<h2>Mirror Direction Hologram Clean</h2>
 
 <div class="accordion">
   <div class="accordion-header">Select Item</div>
@@ -160,6 +187,10 @@
     return key === "4" || key === "6";
   }
 
+  function isCounterClockwise(key) {
+    return key === "6" || key === "8";
+  }
+
   items.forEach(name => {
     const div = document.createElement('div');
     div.className = 'item';
@@ -186,9 +217,12 @@
       const wrap = document.createElement('div');
       wrap.className = 'img-wrap';
 
-      // 4,6번 셀은 rotateY 애니메이션
       if (isRotateYCell(key)) {
-        wrap.classList.add('rotateY');
+        if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
+        else wrap.classList.add('rotateY-cw');
+      } else {
+        if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
+        else wrap.classList.add('rotateX-cw');
       }
 
       const front = document.createElement('div');
