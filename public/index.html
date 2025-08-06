@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hologram Rotate Animation</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    .list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-width: 500px;
+      margin-bottom: 40px;
+      justify-content: center;
+    }
+
+    .item {
+      padding: 8px 12px;
+      border: 1px solid #555;
+      border-radius: 8px;
+      background: #222;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .item:hover {
+      background: #333;
+    }
+
+    .item.selected {
+      background: #00adb5;
+      color: black;
+      font-weight: bold;
+    }
+
+    .grid-container {
+      perspective: 1000px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      transform-style: preserve-3d;
+      animation: rotateYAnim 10s linear infinite;
+      /* 바꾸고 싶으면 rotateXAnim으로 */
+    }
+
+    @keyframes rotateYAnim {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    @keyframes rotateXAnim {
+      from { transform: rotateX(0deg); }
+      to { transform: rotateX(360deg); }
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .img-wrap {
+      width: 80px;
+      height: 80px;
+      /* 2D 회전 애니메이션 */
+      animation: rotate2DAnim 4s linear infinite;
+    }
+
+    @keyframes rotate2DAnim {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #00adb5cc;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🌱 Select an Item</h2>
+  <div class="list" id="itemList"></div>
+
+  <div class="grid-container">
+    <div class="grid" id="holoGrid">
+      <div class="cell"></div> <!-- 1 -->
+      <div class="cell" id="cell2"></div> <!-- 2 -->
+      <div class="cell"></div> <!-- 3 -->
+      <div class="cell" id="cell4"></div> <!-- 4 -->
+      <div class="cell"></div> <!-- 5 -->
+      <div class="cell" id="cell6"></div> <!-- 6 -->
+      <div class="cell"></div> <!-- 7 -->
+      <div class="cell" id="cell8"></div> <!-- 8 -->
+      <div class="cell"></div> <!-- 9 -->
+    </div>
+  </div>
+
+  <script>
+    const items = [
+      "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
+      "Daffodil", "Watermelon", "Pumpkin", "Apple", "Bamboo",
+      "Coconut", "Cactus", "Dragon Fruit", "Mango", "Grape",
+      "Mushroom", "Pepper", "Cacao", "Beanstalk", "Ember Lily",
+      "Sugar Apple", "Burning Bud", "Giant Pinecone"
+    ];
+
+    const itemList = document.getElementById("itemList");
+    const cells = {
+      2: document.getElementById("cell2"),
+      4: document.getElementById("cell4"),
+      6: document.getElementById("cell6"),
+      8: document.getElementById("cell8")
+    };
+
+    items.forEach(name => {
+      const btn = document.createElement("div");
+      btn.className = "item";
+      btn.textContent = name;
+      btn.onclick = () => {
+        document.querySelectorAll(".item").forEach(el => el.classList.remove("selected"));
+        btn.classList.add("selected");
+        showInHologram(name);
+      };
+      itemList.appendChild(btn);
+    });
+
+    function nameToFilename(name) {
+      return name.toLowerCase().replace(/\s+/g, "") + ".png";
+    }
+
+    function showInHologram(name) {
+      const filename = nameToFilename(name);
+      const src = `image/${filename}`;
+
+      Object.entries(cells).forEach(([key, cell]) => {
+        cell.innerHTML = ""; // 초기화
+        const wrap = document.createElement("div");
+        wrap.className = "img-wrap";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = name;
+        wrap.appendChild(img);
+        cell.appendChild(wrap);
+      });
+    }
+  </script>
+</body>
+</html>
