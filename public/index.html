@@ -24,6 +24,21 @@
         h2 {
             margin-bottom: 1rem;
         }
+        button#toggleMadMovie {
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            background-color: #00adb5;
+            color: black;
+            border: none;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+        button#toggleMadMovie:hover {
+            background-color: #008f95;
+        }
         .accordion {
             width: 20rem;
             border-radius: 0.5rem;
@@ -105,7 +120,27 @@
             animation-duration: 4s;
             animation-timing-function: linear;
             animation-iteration-count: infinite;
+            filter: none;
+            transition: filter 0.3s ease;
         }
+        /* 흔들림 애니메이션 */
+        @keyframes shakeLeft {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px) rotate(-2deg); }
+            75% { transform: translateX(3px) rotate(2deg); }
+        }
+        @keyframes shakeRight {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(3px) rotate(2deg); }
+            75% { transform: translateX(-3px) rotate(-2deg); }
+        }
+        .shakeLeft {
+            animation: shakeLeft 0.4s infinite;
+        }
+        .shakeRight {
+            animation: shakeRight 0.4s infinite;
+        }
+        /* 회전 애니메이션 */
         .rotateY-cw {
             animation-name: rotateYAnimCW;
         }
@@ -134,6 +169,12 @@
             from { transform: rotateY(0deg); }
             to { transform: rotateY(-360deg); }
         }
+        /* 글리치 효과 */
+        .glitch {
+            filter: blur(1.5px);
+            opacity: 0.7;
+            transition: filter 0.3s ease, opacity 0.3s ease;
+        }
         .front {
             width: 100%;
             height: 100%;
@@ -145,13 +186,16 @@
             object-fit: cover;
             border-radius: 0.5rem;
             transform-origin: center;
+            transition: transform 0.5s ease;
         }
     </style>
 </head>
 <body>
     <h2>Grow a Garden Hologram</h2>
+    <button id="toggleMadMovie">Mad Movie ON</button>
 
     <audio id="bgMusic" src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Henrik_Ibsen%2C_Edvard_Grieg_-_Morgenstemning_%28Morning_Mood%29.ogg" loop muted></audio>
+    <audio id="funkMusic" src="funk.mp3" loop></audio>
 
     <div class="accordion">
         <div class="accordion-header">Select Item ▼</div>
@@ -172,103 +216,199 @@
         </div>
     </div>
 
-    <script>
-        const bgMusic = document.getElementById('bgMusic');
-        bgMusic.play().catch(() => {});
+<script>
+    const bgMusic = document.getElementById('bgMusic');
+    const funkMusic = document.getElementById('funkMusic');
 
-        document.body.addEventListener('click', () => {
-            if(bgMusic.muted) {
-                bgMusic.muted = false;
-                bgMusic.play();
-                console.log('Background music unmuted and playing');
-            }
-        }, { once: true });
+    bgMusic.play().catch(() => {});
 
-        const accordionHeader = document.querySelector('.accordion-header');
-        const accordionContent = document.getElementById('accordionContent');
+    document.body.addEventListener('click', () => {
+      if(bgMusic.muted) {
+        bgMusic.muted = false;
+        bgMusic.play();
+        console.log('Background music unmuted and playing');
+      }
+    }, { once: true });
 
-        accordionHeader.addEventListener('click', () => {
-            accordionContent.classList.toggle('open');
-            accordionHeader.textContent = accordionContent.classList.contains('open') ? 'Select Item ▲' : 'Select Item ▼';
-        });
+    const accordionHeader = document.querySelector('.accordion-header');
+    const accordionContent = document.getElementById('accordionContent');
 
-        const items = [
-            "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
-            "Daffodil", "Watermelon", "Pumpkin", "Apple", "Bamboo",
-            "Coconut", "Cactus", "Dragon Fruit", "Mango", "Grape",
-            "Mushroom", "Pepper", "Cacao", "Beanstalk", "Ember Lily",
-            "Sugar Apple", "Burning Bud", "Giant Pinecone"
-        ];
+    accordionHeader.addEventListener('click', () => {
+      accordionContent.classList.toggle('open');
+      accordionHeader.textContent = accordionContent.classList.contains('open') ? 'Select Item ▲' : 'Select Item ▼';
+    });
 
-        const holoGridCells = {
-            2: document.getElementById("cell2"),
-            4: document.getElementById("cell4"),
-            6: document.getElementById("cell6"),
-            8: document.getElementById("cell8")
-        };
+    const items = [
+      "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
+      "Daffodil", "Watermelon", "Pumpkin", "Apple", "Bamboo",
+      "Coconut", "Cactus", "Dragon Fruit", "Mango", "Grape",
+      "Mushroom", "Pepper", "Cacao", "Beanstalk", "Ember Lily",
+      "Sugar Apple", "Burning Bud", "Giant Pinecone"
+    ];
 
-        const startRotateDegrees = {
-            2: 0,
-            4: 270,
-            6: 90,
-            8: 180
-        };
+    const holoGridCells = {
+      2: document.getElementById("cell2"),
+      4: document.getElementById("cell4"),
+      6: document.getElementById("cell6"),
+      8: document.getElementById("cell8")
+    };
 
-        function isRotateYCell(key) {
-            return key === "2" || key === "8";
+    const startRotateDegrees = {
+      2: 0,
+      4: 270,
+      6: 90,
+      8: 180
+    };
+
+    function isRotateYCell(key) {
+      return key === "2" || key === "8";
+    }
+
+    function isCounterClockwise(key) {
+      return key === "6" || key === "8";
+    }
+
+    items.forEach(name => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.textContent = name;
+      div.onclick = () => {
+        if (madMovieActive) return; // 매드무비 모드면 클릭 무시
+        document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
+        div.classList.add('selected');
+        showInHologram(name);
+      };
+      accordionContent.appendChild(div);
+    });
+
+    function nameToFilename(name) {
+      return name.toLowerCase().replace(/\s+/g, '') + '.png';
+    }
+
+    function showInHologram(name, glitch=false) {
+      const filename = nameToFilename(name);
+      const src = `image/${filename}`;
+
+      Object.entries(holoGridCells).forEach(([key, cell]) => {
+        cell.innerHTML = '';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'img-wrap';
+
+        if (isRotateYCell(key)) {
+          if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
+          else wrap.classList.add('rotateY-cw');
+        } else {
+          if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
+          else wrap.classList.add('rotateX-cw');
         }
 
-        function isCounterClockwise(key) {
-            return key === "6" || key === "8";
+        if(glitch) {
+          wrap.classList.add('glitch');
+          wrap.style.animation = 'none'; // 글리치 땐 회전 멈춤
+        } else {
+          wrap.classList.remove('glitch');
+          // animation 다시 걸어줌 (원래 회전 애니메이션)
+          wrap.style.animation = '';
         }
 
-        items.forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'item';
-            div.textContent = name;
-            div.onclick = () => {
-                document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
-                div.classList.add('selected');
-                showInHologram(name);
-            };
-            accordionContent.appendChild(div);
-        });
+        const front = document.createElement('div');
+        front.className = 'front';
 
-        function nameToFilename(name) {
-            return name.toLowerCase().replace(/\s+/g, '') + '.png';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = name;
+        img.style.transform = `rotate(${startRotateDegrees[key]}deg)`;
+
+        front.appendChild(img);
+        wrap.appendChild(front);
+        cell.appendChild(wrap);
+      });
+    }
+
+    function applyShakeToWraps() {
+      Object.values(holoGridCells).forEach(cell => {
+        const wrap = cell.querySelector('.img-wrap');
+        if (!wrap) return;
+
+        // 흔들림 애니메이션 토글
+        if (direction) {
+          wrap.classList.remove('shakeRight');
+          wrap.classList.add('shakeLeft');
+        } else {
+          wrap.classList.remove('shakeLeft');
+          wrap.classList.add('shakeRight');
         }
+      });
+    }
 
-        function showInHologram(name) {
-            const filename = nameToFilename(name);
-            const src = `image/${filename}`;
+    let madMovieActive = false;
+    let direction = true;
+    let index = 0;
+    let intervalId = null;
 
-            Object.entries(holoGridCells).forEach(([key, cell]) => {
-                cell.innerHTML = '';
+    function startAutoCycle() {
+      const total = items.length;
+      index = 0;
+      direction = true;
 
-                const wrap = document.createElement('div');
-                wrap.className = 'img-wrap';
+      intervalId = setInterval(() => {
+        // 전환 시작: 글리치 효과 + 회전 멈춤 + 흔들림 없음
+        showInHologram(items[index % total], true);
 
-                if (isRotateYCell(key)) {
-                    if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
-                    else wrap.classList.add('rotateY-cw');
-                } else {
-                    if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
-                    else wrap.classList.add('rotateX-cw');
-                }
+        setTimeout(() => {
+          // 전환 완료: 글리치 제거 + 회전 애니메이션 재개 + 흔들림 적용
+          showInHologram(items[index % total], false);
+          applyShakeToWraps();
 
-                const front = document.createElement('div');
-                front.className = 'front';
+          index++;
+          if (index >= total) {
+            index = 0;
+          }
+          direction = !direction;
+        }, 350);
+      }, 4000);
+    }
 
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = name;
-                img.style.transform = `rotate(${startRotateDegrees[key]}deg)`;
+    function stopAutoCycle() {
+      clearInterval(intervalId);
+      intervalId = null;
+      funkMusic.pause();
+      funkMusic.currentTime = 0;
+    }
 
-                front.appendChild(img);
-                wrap.appendChild(front);
-                cell.appendChild(wrap);
-            });
-        }
-    </script>
+    showInHologram(items[0]);
+
+    const toggleButton = document.getElementById('toggleMadMovie');
+    toggleButton.addEventListener('click', () => {
+      madMovieActive = !madMovieActive;
+
+      if (madMovieActive) {
+        toggleButton.textContent = 'Mad Movie OFF';
+        accordionContent.style.pointerEvents = 'none';
+        accordionContent.style.opacity = '0.5';
+
+        bgMusic.pause();
+        funkMusic.currentTime = 0;
+        funkMusic.play();
+
+        stopAutoCycle();
+        setTimeout(() => {
+          startAutoCycle();
+        }, 1000);  // 1초 대기 후 시작
+
+      } else {
+        toggleButton.textContent = 'Mad Movie ON';
+        accordionContent.style.pointerEvents = 'auto';
+        accordionContent.style.opacity = '1';
+
+        funkMusic.pause();
+        funkMusic.currentTime = 0;
+        bgMusic.play();
+
+        stopAutoCycle();
+      }
+    });
+</script>
 </body>
 </html>
