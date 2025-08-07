@@ -120,32 +120,23 @@
     height: 5rem;
     position: relative;
     transform-style: preserve-3d;
+    animation-duration: 4s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
     transition: filter 0.3s ease;
     filter: none;
   }
   .rotateY-cw {
     animation-name: rotateYAnimCW;
-    animation-duration: 4s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
   }
   .rotateY-ccw {
     animation-name: rotateYAnimCCW;
-    animation-duration: 4s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
   }
   .rotateX-cw {
     animation-name: rotateXAnimCW;
-    animation-duration: 4s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
   }
   .rotateX-ccw {
     animation-name: rotateXAnimCCW;
-    animation-duration: 4s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
   }
   @keyframes rotateXAnimCW {
     from { transform: rotateX(0deg); }
@@ -179,16 +170,23 @@
     transition: filter 0.3s ease;
   }
 
-  /* funk 흔들림 애니메이션 */
-  @keyframes funkShake {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(-3px, 2px) rotate(-1deg); }
-    50% { transform: translate(3px, -2px) rotate(1deg); }
-    75% { transform: translate(-2px, 1px) rotate(-0.5deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
+  /* 흔들림 애니메이션 */
+  .shakeLeft {
+    animation: shakeLeft 0.15s ease-in-out;
+  }
+  .shakeRight {
+    animation: shakeRight 0.15s ease-in-out;
+  }
+  @keyframes shakeLeft {
+    0% { transform: translate(-10%, 0) rotate(-3deg) scale(1.1); }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  }
+  @keyframes shakeRight {
+    0% { transform: translate(10%, 0) rotate(3deg) scale(1.1); }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); }
   }
 
-  /* 글리치 효과 */
+  /* 글리치 효과 (노이즈 + 흔들림) */
   @keyframes glitchTranslate {
     0%, 100% { transform: translate(0,0); }
     20% { transform: translate(-2px, 2px); }
@@ -196,10 +194,27 @@
     60% { transform: translate(-1px, 1px); }
     80% { transform: translate(1px, -1px); }
   }
+
   .glitch {
     animation: glitchTranslate 0.3s infinite ease-in-out;
     filter: blur(1.5px);
   }
+
+  /* 필터 다양하게 */
+  .filter-none { filter: none; }
+  .filter-brightness { filter: brightness(1.3); }
+  .filter-contrast { filter: contrast(1.6); }
+  .filter-hue-rotate-45 { filter: hue-rotate(45deg); }
+  .filter-hue-rotate-90 { filter: hue-rotate(90deg); }
+  .filter-hue-rotate-180 { filter: hue-rotate(180deg); }
+  .filter-saturate { filter: saturate(2); }
+  .filter-sepia { filter: sepia(0.7); }
+  .filter-invert { filter: invert(0.7); }
+  .filter-grayscale { filter: grayscale(0.6); }
+  .filter-blur { filter: blur(1px); }
+  .filter-drop-shadow { filter: drop-shadow(2px 2px 2px #0ff); }
+  .filter-opacity { filter: opacity(0.8); }
+  .filter-contrast-bright { filter: contrast(1.8) brightness(1.2); }
 </style>
 </head>
 <body>
@@ -208,7 +223,7 @@
   <button id="toggleMadMovie">Mad Movie ON</button>
 
   <audio id="bgMusic" src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Henrik_Ibsen%2C_Edvard_Grieg_-_Morgenstemning_%28Morning_Mood%29.ogg" loop muted></audio>
-  <audio id="funkMusic" src="funk.mp3" loop></audio>
+  <audio id="funkMusic" src="funk.mp3"></audio>
 
   <div class="accordion">
     <div class="accordion-header">Select Item ▼</div>
@@ -232,8 +247,6 @@
 <script>
   const bgMusic = document.getElementById('bgMusic');
   const funkMusic = document.getElementById('funkMusic');
-  const toggleButton = document.getElementById('toggleMadMovie');
-  const accordionContent = document.getElementById('accordionContent');
 
   bgMusic.play().catch(() => {});
 
@@ -245,36 +258,17 @@
     }
   }, { once: true });
 
-  toggleButton.addEventListener('click', () => {
-    madMovieActive = !madMovieActive;
-    if(madMovieActive) {
-      toggleButton.textContent = 'Mad Movie OFF';
-      accordionContent.style.pointerEvents = 'none';
-      accordionContent.style.opacity = '0.5';
+  const accordionHeader = document.querySelector('.accordion-header');
+  const accordionContent = document.getElementById('accordionContent');
 
-      bgMusic.pause();
-      funkMusic.currentTime = 0;
-      funkMusic.play();
-
-      setTimeout(() => {
-        startAutoCycle(true);
-      }, 1000);
-    } else {
-      toggleButton.textContent = 'Mad Movie ON';
-      accordionContent.style.pointerEvents = 'auto';
-      accordionContent.style.opacity = '1';
-
-      funkMusic.pause();
-      bgMusic.play();
-
-      stopAutoCycle();
-      showInHologram(items[0]); // 기본 첫 아이템 표시
-    }
+  accordionHeader.addEventListener('click', () => {
+    accordionContent.classList.toggle('open');
+    accordionHeader.textContent = accordionContent.classList.contains('open') ? 'Select Item ▲' : 'Select Item ▼';
   });
 
   const items = [
     "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
-    "Daffodil", "Watermelon", "Pumpkin", "Apple", "Bamboo",
+    "Daffodil", "Watermelon", "Pumkin", "Apple", "Bamboo",
     "Coconut", "Cactus", "Dragon Fruit", "Mango", "Grape",
     "Mushroom", "Pepper", "Cacao", "Beanstalk", "Ember Lily",
     "Sugar Apple", "Burning Bud", "Giant Pinecone"
@@ -294,9 +288,23 @@
     8: 180
   };
 
-  let madMovieActive = false;
-  let index = 0;
-  let intervalId = null;
+  // 필터 클래스 대폭 추가
+  const filters = [
+    'filter-none',
+    'filter-brightness',
+    'filter-contrast',
+    'filter-hue-rotate-45',
+    'filter-hue-rotate-90',
+    'filter-hue-rotate-180',
+    'filter-saturate',
+    'filter-sepia',
+    'filter-invert',
+    'filter-grayscale',
+    'filter-blur',
+    'filter-drop-shadow',
+    'filter-opacity',
+    'filter-contrast-bright'
+  ];
 
   function isRotateYCell(key) {
     return key === "2" || key === "8";
@@ -311,7 +319,7 @@
     div.className = 'item';
     div.textContent = name;
     div.onclick = () => {
-      if(madMovieActive) return;
+      if (madMovieActive) return;
       document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
       div.classList.add('selected');
       showInHologram(name);
@@ -321,6 +329,11 @@
 
   function nameToFilename(name) {
     return name.toLowerCase().replace(/\s+/g, '') + '.png';
+  }
+
+  function getRandomFilterClass() {
+    const idx = Math.floor(Math.random() * filters.length);
+    return filters[idx];
   }
 
   function showInHologram(name, glitch=false) {
@@ -333,20 +346,12 @@
       const wrap = document.createElement('div');
       wrap.className = 'img-wrap';
 
-      // funk 모드면 회전 애니메이션 제거, funk 흔들림 넣기
-      if(madMovieActive){
-        wrap.style.animation = 'funkShake 0.5s infinite alternate ease-in-out';
-        wrap.classList.remove('rotateY-cw', 'rotateY-ccw', 'rotateX-cw', 'rotateX-ccw');
+      if (isRotateYCell(key)) {
+        if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
+        else wrap.classList.add('rotateY-cw');
       } else {
-        // 일반 모드면 회전 애니메이션 붙이기
-        wrap.style.animation = '';
-        if (isRotateYCell(key)) {
-          if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
-          else wrap.classList.add('rotateY-cw');
-        } else {
-          if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
-          else wrap.classList.add('rotateX-cw');
-        }
+        if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
+        else wrap.classList.add('rotateX-cw');
       }
 
       if(glitch) {
@@ -363,25 +368,57 @@
       img.alt = name;
       img.style.transform = `rotate(${startRotateDegrees[key]}deg)`;
 
+      // 필터 랜덤 적용
+      img.className = getRandomFilterClass();
+
       front.appendChild(img);
       wrap.appendChild(front);
       cell.appendChild(wrap);
     });
   }
 
-  function startAutoCycle(useFunk=false) {
+  function applyShakeToWraps() {
+    Object.values(holoGridCells).forEach(cell => {
+      const wrap = cell.querySelector('.img-wrap');
+      if (!wrap) return;
+
+      wrap.style.animation = 'none';
+
+      if (direction) {
+        wrap.classList.remove('shakeRight');
+        wrap.classList.add('shakeLeft');
+      } else {
+        wrap.classList.remove('shakeLeft');
+        wrap.classList.add('shakeRight');
+      }
+    });
+  }
+
+  let madMovieActive = false;
+  let direction = true;
+  let index = 0;
+  let intervalId = null;
+  let autoCycleDelay = 550; // 반으로 줄인 주기
+
+  function startAutoCycle() {
     const total = items.length;
     index = 0;
+    direction = true;
 
     intervalId = setInterval(() => {
-      showInHologram(items[index % total], true); // glitch on 전환 직후
+      showInHologram(items[index % total], true);
 
       setTimeout(() => {
         showInHologram(items[index % total], false);
+        applyShakeToWraps();
+
         index++;
-        if(index >= total) index = 0;
+        if (index >= total) {
+          index = 0;
+        }
+        direction = !direction;
       }, 350);
-    }, useFunk ? 4000 : 1100);
+    }, autoCycleDelay);
   }
 
   function stopAutoCycle() {
@@ -389,9 +426,34 @@
     intervalId = null;
   }
 
-  // 초기 화면 첫 아이템 보여주기
+  // 처음엔 첫 아이템 보여줌
   showInHologram(items[0]);
 
+  const toggleButton = document.getElementById('toggleMadMovie');
+  toggleButton.addEventListener('click', () => {
+    madMovieActive = !madMovieActive;
+
+    if (madMovieActive) {
+      toggleButton.textContent = 'Mad Movie OFF';
+      accordionContent.style.pointerEvents = 'none';
+      accordionContent.style.opacity = '0.5';
+      stopAutoCycle();
+      startAutoCycle();
+
+      // funk 음악 재생
+      funkMusic.currentTime = 0;
+      funkMusic.play();
+    } else {
+      toggleButton.textContent = 'Mad Movie ON';
+      accordionContent.style.pointerEvents = 'auto';
+      accordionContent.style.opacity = '1';
+      stopAutoCycle();
+
+      // funk 음악 멈춤
+      funkMusic.pause();
+      funkMusic.currentTime = 0;
+    }
+  });
 </script>
 </body>
 </html>
