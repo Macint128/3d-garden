@@ -331,6 +331,8 @@
     const total = items.length;
     index = 0;
 
+    if(intervalId) clearInterval(intervalId);
+
     intervalId = setInterval(() => {
       showInHologram(items[index % total], true);
 
@@ -343,8 +345,11 @@
   }
 
   function stopAutoCycle() {
-    clearInterval(intervalId);
-    intervalId = null;
+    if(intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+      console.log("자동 사이클 멈춤!");
+    }
   }
 
   toggleButton.addEventListener('click', () => {
