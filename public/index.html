@@ -9,7 +9,6 @@
     <link rel="apple-touch-icon" href="giantpinecone.png" />
     <meta name="apple-mobile-web-app-title" content="Grow a Garden Hologram" />
     <style>
-        /* 기본 바디 설정 */
         body {
             background: #111;
             color: #eee;
@@ -22,12 +21,9 @@
             height: 100vh;
             justify-content: center;
         }
-
         h2 {
             margin-bottom: 1rem;
         }
-
-        /* 아코디언 박스 */
         .accordion {
             width: 20rem;
             border-radius: 0.5rem;
@@ -35,8 +31,6 @@
             margin-bottom: 1.25rem;
             background: #222;
         }
-
-        /* 헤더 */
         .accordion-header {
             padding: 0.75rem 1.25rem;
             background: #333;
@@ -47,8 +41,6 @@
             user-select: none;
             cursor: pointer;
         }
-
-        /* 내용 부분 스크롤 및 높이 제한 */
         .accordion-content {
             max-height: 0;
             overflow-y: auto;
@@ -58,13 +50,9 @@
             scrollbar-width: thin;
             scrollbar-color: #00adb5 #111;
         }
-
-        /* 열렸을 때 max-height 조절 */
         .accordion-content.open {
             max-height: 11.25rem;
         }
-
-        /* 크롬, 사파리 스크롤바 커스터마이징 */
         .accordion-content::-webkit-scrollbar {
             width: 0.375rem;
         }
@@ -75,8 +63,6 @@
             background-color: #00adb5;
             border-radius: 0.1875rem;
         }
-
-        /* 아이템 리스트 */
         .item {
             padding: 0.625rem 1.25rem;
             border-bottom: 1px solid #444;
@@ -91,8 +77,6 @@
             color: black;
             font-weight: bold;
         }
-
-        /* 홀로그램 그리드 */
         .grid-container {
             perspective: 62.5rem;
         }
@@ -122,23 +106,18 @@
             animation-timing-function: linear;
             animation-iteration-count: infinite;
         }
-
-        /* Y축 시계방향 (2,8번) */
         .rotateY-cw {
             animation-name: rotateYAnimCW;
         }
         .rotateY-ccw {
             animation-name: rotateYAnimCCW;
         }
-
-        /* X축 시계방향 (4,6번) */
         .rotateX-cw {
             animation-name: rotateXAnimCW;
         }
         .rotateX-ccw {
             animation-name: rotateXAnimCCW;
         }
-
         @keyframes rotateXAnimCW {
             from { transform: rotateX(0deg); }
             to { transform: rotateX(360deg); }
@@ -155,7 +134,6 @@
             from { transform: rotateY(0deg); }
             to { transform: rotateY(-360deg); }
         }
-
         .front {
             width: 100%;
             height: 100%;
@@ -173,43 +151,45 @@
 <body>
     <h2>Grow a Garden Hologram</h2>
 
-    <audio autoplay loop>
-        <source src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Henrik_Ibsen%2C_Edvard_Grieg_-_Morgenstemning_%28Morning_Mood%29.ogg" type="audio/ogg">
-        Your browser does not support the audio element.
-    </audio>
+    <audio id="bgMusic" src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Henrik_Ibsen%2C_Edvard_Grieg_-_Morgenstemning_%28Morning_Mood%29.ogg" loop muted></audio>
 
     <div class="accordion">
         <div class="accordion-header">Select Item ▼</div>
-        <div class="accordion-content" id="accordionContent">
-            <!-- 리스트 아이템들 -->
-        </div>
+        <div class="accordion-content" id="accordionContent"></div>
     </div>
 
     <div class="grid-container">
         <div class="grid" id="holoGrid">
-            <div class="cell"></div> <!-- 1 -->
-            <div class="cell" id="cell2"></div> <!-- 2 -->
-            <div class="cell"></div> <!-- 3 -->
-            <div class="cell" id="cell4"></div> <!-- 4 -->
-            <div class="cell"></div> <!-- 5 -->
-            <div class="cell" id="cell6"></div> <!-- 6 -->
-            <div class="cell"></div> <!-- 7 -->
-            <div class="cell" id="cell8"></div> <!-- 8 -->
-            <div class="cell"></div> <!-- 9 -->
+            <div class="cell"></div>
+            <div class="cell" id="cell2"></div>
+            <div class="cell"></div>
+            <div class="cell" id="cell4"></div>
+            <div class="cell"></div>
+            <div class="cell" id="cell6"></div>
+            <div class="cell"></div>
+            <div class="cell" id="cell8"></div>
+            <div class="cell"></div>
         </div>
     </div>
 
     <script>
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.play().catch(() => {});
+
+        document.body.addEventListener('click', () => {
+            if(bgMusic.muted) {
+                bgMusic.muted = false;
+                bgMusic.play();
+                console.log('Background music unmuted and playing');
+            }
+        }, { once: true });
+
         const accordionHeader = document.querySelector('.accordion-header');
         const accordionContent = document.getElementById('accordionContent');
 
         accordionHeader.addEventListener('click', () => {
             accordionContent.classList.toggle('open');
-            if(accordionContent.classList.contains('open')) {
-                accordionHeader.textContent = 'Select Item ▲';
-            } else {
-                accordionHeader.textContent = 'Select Item ▼';
-            }
+            accordionHeader.textContent = accordionContent.classList.contains('open') ? 'Select Item ▲' : 'Select Item ▼';
         });
 
         const items = [
