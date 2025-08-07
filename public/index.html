@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
@@ -9,294 +9,286 @@
     <link rel="apple-touch-icon" href="giantpinecone.png" />
     <meta name="apple-mobile-web-app-title" content="Grow a Garden Hologram" />
     <style>
-    /* 기본 바디 설정 */
-    body {
-        background: #111;
-        color: #eee;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        padding: 1.25rem; /* 20px */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+        /* 기본 바디 설정 */
+        body {
+            background: #111;
+            color: #eee;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            height: 100vh;
+            justify-content: center;
+        }
 
-    h2 {
-        margin-bottom: 1rem;
-    }
+        h2 {
+            margin-bottom: 1rem;
+        }
 
-    /* 아코디언 박스 */
-    .accordion {
-        width: 20rem; /* 320px */
-        border-radius: 0.5rem; /* 8px */
-        box-shadow: 0 0 0.625rem #007f7f99; /* 10px */
-        margin-bottom: 1.25rem; /* 20px */
-        background: #222;
-    }
+        /* 아코디언 박스 */
+        .accordion {
+            width: 20rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 0.625rem #007f7f99;
+            margin-bottom: 1.25rem;
+            background: #222;
+        }
 
-    /* 헤더 */
-    .accordion-header {
-        padding: 0.75rem 1.25rem; /* 12px 20px */
-        background: #333;
-        font-weight: 600;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        user-select: none;
-        cursor: pointer;
-    }
+        /* 헤더 */
+        .accordion-header {
+            padding: 0.75rem 1.25rem;
+            background: #333;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            cursor: pointer;
+        }
 
-    /* 내용 부분 스크롤 및 높이 제한 */
-    .accordion-content {
-        max-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-        background: #1a1a1a;
-        transition: max-height 0.4s ease;
-        scrollbar-width: thin;
-        scrollbar-color: #00adb5 #111;
-    }
+        /* 내용 부분 스크롤 및 높이 제한 */
+        .accordion-content {
+            max-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #1a1a1a;
+            transition: max-height 0.4s ease;
+            scrollbar-width: thin;
+            scrollbar-color: #00adb5 #111;
+        }
 
-    /* 열렸을 때 max-height 조절(rem 단위) */
-    .accordion-content.open {
-        max-height: 11.25rem; /* 180px */
-    }
+        /* 열렸을 때 max-height 조절 */
+        .accordion-content.open {
+            max-height: 11.25rem;
+        }
 
-    /* 크롬, 사파리 스크롤바 커스터마이징 */
-    .accordion-content::-webkit-scrollbar {
-        width: 0.375rem; /* 6px */
-    }
-    .accordion-content::-webkit-scrollbar-track {
-        background: #111;
-    }
-    .accordion-content::-webkit-scrollbar-thumb {
-        background-color: #00adb5;
-        border-radius: 0.1875rem; /* 3px */
-    }
+        /* 크롬, 사파리 스크롤바 커스터마이징 */
+        .accordion-content::-webkit-scrollbar {
+            width: 0.375rem;
+        }
+        .accordion-content::-webkit-scrollbar-track {
+            background: #111;
+        }
+        .accordion-content::-webkit-scrollbar-thumb {
+            background-color: #00adb5;
+            border-radius: 0.1875rem;
+        }
 
-    /* 아이템 리스트 */
-    .item {
-        padding: 0.625rem 1.25rem; /* 10px 20px */
-        border-bottom: 1px solid #444;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .item:hover {
-        background: #333;
-    }
-    .item.selected {
-        background: #00adb5;
-        color: black;
-        font-weight: bold;
-    }
+        /* 아이템 리스트 */
+        .item {
+            padding: 0.625rem 1.25rem;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .item:hover {
+            background: #333;
+        }
+        .item.selected {
+            background: #00adb5;
+            color: black;
+            font-weight: bold;
+        }
 
-    /* 홀로그램 그리드 */
-    .grid-container {
-        perspective: 62.5rem; /* 1000px */
-    }
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(3, 6.25rem); /* 100px */
-        grid-template-rows: repeat(3, 6.25rem); /* 100px */
-        gap: 0.3125rem; /* 5px */
-        transform-style: preserve-3d;
-    }
-    .cell {
-        width: 6.25rem; /* 100px */
-        height: 6.25rem; /* 100px */
-        background: transparent;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        perspective: 37.5rem; /* 600px */
-    }
-    .img-wrap {
-        width: 5rem; /* 80px */
-        height: 5rem; /* 80px */
-        position: relative;
-        transform-style: preserve-3d;
-        animation-duration: 4s;
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;
-    }
+        /* 홀로그램 그리드 */
+        .grid-container {
+            perspective: 62.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 6.25rem);
+            grid-template-rows: repeat(3, 6.25rem);
+            gap: 0.3125rem;
+            transform-style: preserve-3d;
+        }
+        .cell {
+            width: 6.25rem;
+            height: 6.25rem;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            perspective: 37.5rem;
+        }
+        .img-wrap {
+            width: 5rem;
+            height: 5rem;
+            position: relative;
+            transform-style: preserve-3d;
+            animation-duration: 4s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
 
-    /* Y축 시계방향 (2,8번) */
-    .rotateY-cw {
-        animation-name: rotateYAnimCW;
-    }
-    .rotateY-ccw {
-        animation-name: rotateYAnimCCW;
-    }
+        /* Y축 시계방향 (2,8번) */
+        .rotateY-cw {
+            animation-name: rotateYAnimCW;
+        }
+        .rotateY-ccw {
+            animation-name: rotateYAnimCCW;
+        }
 
-    /* X축 시계방향 (4,6번) */
-    .rotateX-cw {
-        animation-name: rotateXAnimCW;
-    }
-    .rotateX-ccw {
-        animation-name: rotateXAnimCCW;
-    }
+        /* X축 시계방향 (4,6번) */
+        .rotateX-cw {
+            animation-name: rotateXAnimCW;
+        }
+        .rotateX-ccw {
+            animation-name: rotateXAnimCCW;
+        }
 
-    @keyframes rotateXAnimCW {
-        from { transform: rotateX(0deg); }
-        to { transform: rotateX(360deg); }
-    }
-    @keyframes rotateXAnimCCW {
-        from { transform: rotateX(0deg); }
-        to { transform: rotateX(-360deg); }
-    }
-    @keyframes rotateYAnimCW {
-        from { transform: rotateY(0deg); }
-        to { transform: rotateY(360deg); }
-    }
-    @keyframes rotateYAnimCCW {
-        from { transform: rotateY(0deg); }
-        to { transform: rotateY(-360deg); }
-    }
+        @keyframes rotateXAnimCW {
+            from { transform: rotateX(0deg); }
+            to { transform: rotateX(360deg); }
+        }
+        @keyframes rotateXAnimCCW {
+            from { transform: rotateX(0deg); }
+            to { transform: rotateX(-360deg); }
+        }
+        @keyframes rotateYAnimCW {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+        @keyframes rotateYAnimCCW {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(-360deg); }
+        }
 
-    .front {
-        width: 100%;
-        height: 100%;
-        border-radius: 0.5rem; /* 8px */
-    }
-    .front img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 0.5rem;
-        transform-origin: center;
-    }
+        .front {
+            width: 100%;
+            height: 100%;
+            border-radius: 0.5rem;
+        }
+        .front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            transform-origin: center;
+        }
     </style>
 </head>
 <body>
-<h2>Accordion Toggle Hologram with Scroll & Music</h2>
+    <h2>Grow a Garden Hologram</h2>
 
-<div class="accordion">
-  <div class="accordion-header">Select Item ▼</div>
-  <div class="accordion-content" id="accordionContent">
-    <!-- 리스트 아이템들 -->
-  </div>
-</div>
+    <audio autoplay loop>
+        <source src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Henrik_Ibsen%2C_Edvard_Grieg_-_Morgenstemning_%28Morning_Mood%29.ogg" type="audio/ogg">
+        Your browser does not support the audio element.
+    </audio>
 
-<div class="grid-container">
-  <div class="grid" id="holoGrid">
-    <div class="cell"></div> <!-- 1 -->
-    <div class="cell" id="cell2"></div> <!-- 2 -->
-    <div class="cell"></div> <!-- 3 -->
-    <div class="cell" id="cell4"></div> <!-- 4 -->
-    <div class="cell"></div> <!-- 5 -->
-    <div class="cell" id="cell6"></div> <!-- 6 -->
-    <div class="cell"></div> <!-- 7 -->
-    <div class="cell" id="cell8"></div> <!-- 8 -->
-    <div class="cell"></div> <!-- 9 -->
-  </div>
-</div>
+    <div class="accordion">
+        <div class="accordion-header">Select Item ▼</div>
+        <div class="accordion-content" id="accordionContent">
+            <!-- 리스트 아이템들 -->
+        </div>
+    </div>
 
-<!-- 배경음악 -->
-<audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/23/audio_bbd1c31d9f.mp3?filename=morning-mood-110988.mp3" loop></audio>
+    <div class="grid-container">
+        <div class="grid" id="holoGrid">
+            <div class="cell"></div> <!-- 1 -->
+            <div class="cell" id="cell2"></div> <!-- 2 -->
+            <div class="cell"></div> <!-- 3 -->
+            <div class="cell" id="cell4"></div> <!-- 4 -->
+            <div class="cell"></div> <!-- 5 -->
+            <div class="cell" id="cell6"></div> <!-- 6 -->
+            <div class="cell"></div> <!-- 7 -->
+            <div class="cell" id="cell8"></div> <!-- 8 -->
+            <div class="cell"></div> <!-- 9 -->
+        </div>
+    </div>
 
-<script>
-  const accordionHeader = document.querySelector('.accordion-header');
-  const accordionContent = document.getElementById('accordionContent');
+    <script>
+        const accordionHeader = document.querySelector('.accordion-header');
+        const accordionContent = document.getElementById('accordionContent');
 
-  accordionHeader.addEventListener('click', () => {
-    accordionContent.classList.toggle('open');
-    accordionHeader.textContent = accordionContent.classList.contains('open') ? 'Select Item ▲' : 'Select Item ▼';
-  });
+        accordionHeader.addEventListener('click', () => {
+            accordionContent.classList.toggle('open');
+            if(accordionContent.classList.contains('open')) {
+                accordionHeader.textContent = 'Select Item ▲';
+            } else {
+                accordionHeader.textContent = 'Select Item ▼';
+            }
+        });
 
-  const items = [
-    "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
-    "Daffodil", "Watermelon", "Pumpkin", "Apple", "Bamboo",
-    "Coconut", "Cactus", "Dragon Fruit", "Mango", "Grape",
-    "Mushroom", "Pepper", "Cacao", "Beanstalk", "Ember Lily",
-    "Sugar Apple", "Burning Bud", "Giant Pinecone"
-  ];
+        const items = [
+            "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
+            "Daffodil", "Watermelon", "Pumpkin", "Apple", "Bamboo",
+            "Coconut", "Cactus", "Dragon Fruit", "Mango", "Grape",
+            "Mushroom", "Pepper", "Cacao", "Beanstalk", "Ember Lily",
+            "Sugar Apple", "Burning Bud", "Giant Pinecone"
+        ];
 
-  const holoGridCells = {
-    2: document.getElementById("cell2"),
-    4: document.getElementById("cell4"),
-    6: document.getElementById("cell6"),
-    8: document.getElementById("cell8")
-  };
+        const holoGridCells = {
+            2: document.getElementById("cell2"),
+            4: document.getElementById("cell4"),
+            6: document.getElementById("cell6"),
+            8: document.getElementById("cell8")
+        };
 
-  const startRotateDegrees = {
-    2: 0,
-    4: 270,
-    6: 90,
-    8: 180
-  };
+        const startRotateDegrees = {
+            2: 0,
+            4: 270,
+            6: 90,
+            8: 180
+        };
 
-  function isRotateYCell(key) {
-    return key === "2" || key === "8";
-  }
+        function isRotateYCell(key) {
+            return key === "2" || key === "8";
+        }
 
-  function isCounterClockwise(key) {
-    return key === "6" || key === "8";
-  }
+        function isCounterClockwise(key) {
+            return key === "6" || key === "8";
+        }
 
-  items.forEach(name => {
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.textContent = name;
-    div.onclick = () => {
-      document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
-      div.classList.add('selected');
-      showInHologram(name);
-    };
-    accordionContent.appendChild(div);
-  });
+        items.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.textContent = name;
+            div.onclick = () => {
+                document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
+                div.classList.add('selected');
+                showInHologram(name);
+            };
+            accordionContent.appendChild(div);
+        });
 
-  function nameToFilename(name) {
-    return name.toLowerCase().replace(/\s+/g, '') + '.png';
-  }
+        function nameToFilename(name) {
+            return name.toLowerCase().replace(/\s+/g, '') + '.png';
+        }
 
-  function showInHologram(name) {
-    const filename = nameToFilename(name);
-    const src = `image/${filename}`;
+        function showInHologram(name) {
+            const filename = nameToFilename(name);
+            const src = `image/${filename}`;
 
-    Object.entries(holoGridCells).forEach(([key, cell]) => {
-      cell.innerHTML = '';
+            Object.entries(holoGridCells).forEach(([key, cell]) => {
+                cell.innerHTML = '';
 
-      const wrap = document.createElement('div');
-      wrap.className = 'img-wrap';
+                const wrap = document.createElement('div');
+                wrap.className = 'img-wrap';
 
-      if (isRotateYCell(key)) {
-        if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
-        else wrap.classList.add('rotateY-cw');
-      } else {
-        if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
-        else wrap.classList.add('rotateX-cw');
-      }
+                if (isRotateYCell(key)) {
+                    if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
+                    else wrap.classList.add('rotateY-cw');
+                } else {
+                    if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
+                    else wrap.classList.add('rotateX-cw');
+                }
 
-      const front = document.createElement('div');
-      front.className = 'front';
+                const front = document.createElement('div');
+                front.className = 'front';
 
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = name;
-      img.style.transform = `rotate(${startRotateDegrees[key]}deg)`;
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = name;
+                img.style.transform = `rotate(${startRotateDegrees[key]}deg)`;
 
-      front.appendChild(img);
-      wrap.appendChild(front);
-      cell.appendChild(wrap);
-    });
-  }
-
-  // 배경음악 제어
-  const bgMusic = document.getElementById('bgMusic');
-
-  bgMusic.muted = true;
-  bgMusic.play().catch(() => {
-    // 자동재생 실패 무시
-  });
-
-  document.body.addEventListener('click', () => {
-    if(bgMusic.muted) {
-      bgMusic.muted = false;
-      bgMusic.play();
-      console.log('Background music unmuted and playing');
-    }
-  }, { once: true });
-</script>
-
+                front.appendChild(img);
+                wrap.appendChild(front);
+                cell.appendChild(wrap);
+            });
+        }
+    </script>
 </body>
 </html>
