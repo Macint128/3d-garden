@@ -207,7 +207,6 @@
 
   <button id="toggleMadMovie">Mad Movie ON</button>
 
-  <audio id="bgMusic" src="https://upload.wikimedia.org/wikipedia/commons/7/7b/Henrik_Ibsen%2C_Edvard_Grieg_-_Morgenstemning_%28Morning_Mood%29.ogg" loop muted></audio>
   <audio id="funkMusic" src="funk.mp3" loop></audio>
 
   <div class="accordion">
@@ -230,20 +229,9 @@
   </div>
 
 <script>
-  const bgMusic = document.getElementById('bgMusic');
   const funkMusic = document.getElementById('funkMusic');
   const toggleButton = document.getElementById('toggleMadMovie');
   const accordionContent = document.getElementById('accordionContent');
-
-  bgMusic.play().catch(() => {});
-
-  document.body.addEventListener('click', () => {
-    if(bgMusic.muted) {
-      bgMusic.muted = false;
-      bgMusic.play();
-      console.log('Background music unmuted and playing');
-    }
-  }, { once: true });
 
   let madMovieActive = false;
   let index = 0;
@@ -306,11 +294,12 @@
       const wrap = document.createElement('div');
       wrap.className = 'img-wrap';
 
+      wrap.style.animation = '';
+      wrap.classList.remove('rotateY-cw', 'rotateY-ccw', 'rotateX-cw', 'rotateX-ccw', 'glitch');
+
       if(madMovieActive){
         wrap.style.animation = 'funkShake 0.5s infinite alternate ease-in-out';
-        wrap.classList.remove('rotateY-cw', 'rotateY-ccw', 'rotateX-cw', 'rotateX-ccw');
       } else {
-        wrap.style.animation = '';
         if (isRotateYCell(key)) {
           if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
           else wrap.classList.add('rotateY-cw');
@@ -322,8 +311,6 @@
 
       if(glitch) {
         wrap.classList.add('glitch');
-      } else {
-        wrap.classList.remove('glitch');
       }
 
       const front = document.createElement('div');
@@ -345,14 +332,14 @@
     index = 0;
 
     intervalId = setInterval(() => {
-      showInHologram(items[index % total], true); // glitch on 전환 직후
+      showInHologram(items[index % total], true);
 
       setTimeout(() => {
         showInHologram(items[index % total], false);
         index++;
         if(index >= total) index = 0;
       }, 350);
-    }, useFunk ? 2000 : 1100);  // funk 모드 2초 간격으로 변경
+    }, useFunk ? 2000 : 1100);
   }
 
   function stopAutoCycle() {
@@ -367,27 +354,24 @@
       accordionContent.style.pointerEvents = 'none';
       accordionContent.style.opacity = '0.5';
 
-      bgMusic.pause();
       funkMusic.currentTime = 0;
       funkMusic.play();
 
       setTimeout(() => {
         startAutoCycle(true);
-      }, 50);  // funk 모드 시작 지연 1초로 변경
+      }, 1000);
     } else {
       toggleButton.textContent = 'Mad Movie ON';
       accordionContent.style.pointerEvents = 'auto';
       accordionContent.style.opacity = '1';
 
       funkMusic.pause();
-      bgMusic.play();
 
       stopAutoCycle();
-      showInHologram(items[0]); // 기본 첫 아이템 표시
+      showInHologram(items[0]);
     }
   });
 
-  // 초기 화면 첫 아이템 보여주기
   showInHologram(items[0]);
 </script>
 </body>
