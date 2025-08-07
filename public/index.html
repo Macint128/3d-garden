@@ -168,7 +168,7 @@
     </style>
 </head>
 <body>
-<h2>Accordion Toggle Hologram with Scroll</h2>
+<h2>Accordion Toggle Hologram with Scroll & Music</h2>
 
 <div class="accordion">
   <div class="accordion-header">Select Item ▼</div>
@@ -191,17 +191,16 @@
   </div>
 </div>
 
+<!-- 배경음악 -->
+<audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2023/03/23/audio_bbd1c31d9f.mp3?filename=morning-mood-110988.mp3" loop></audio>
+
 <script>
   const accordionHeader = document.querySelector('.accordion-header');
   const accordionContent = document.getElementById('accordionContent');
 
   accordionHeader.addEventListener('click', () => {
     accordionContent.classList.toggle('open');
-    if(accordionContent.classList.contains('open')) {
-      accordionHeader.textContent = 'Select Item ▲';
-    } else {
-      accordionHeader.textContent = 'Select Item ▼';
-    }
+    accordionHeader.textContent = accordionContent.classList.contains('open') ? 'Select Item ▲' : 'Select Item ▼';
   });
 
   const items = [
@@ -281,6 +280,22 @@
       cell.appendChild(wrap);
     });
   }
+
+  // 배경음악 제어
+  const bgMusic = document.getElementById('bgMusic');
+
+  bgMusic.muted = true;
+  bgMusic.play().catch(() => {
+    // 자동재생 실패 무시
+  });
+
+  document.body.addEventListener('click', () => {
+    if(bgMusic.muted) {
+      bgMusic.muted = false;
+      bgMusic.play();
+      console.log('Background music unmuted and playing');
+    }
+  }, { once: true });
 </script>
 
 </body>
