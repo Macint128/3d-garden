@@ -245,32 +245,9 @@
     }
   }, { once: true });
 
-  toggleButton.addEventListener('click', () => {
-    madMovieActive = !madMovieActive;
-    if(madMovieActive) {
-      toggleButton.textContent = 'Mad Movie OFF';
-      accordionContent.style.pointerEvents = 'none';
-      accordionContent.style.opacity = '0.5';
-
-      bgMusic.pause();
-      funkMusic.currentTime = 0;
-      funkMusic.play();
-
-      setTimeout(() => {
-        startAutoCycle(true);
-      }, 1000);
-    } else {
-      toggleButton.textContent = 'Mad Movie ON';
-      accordionContent.style.pointerEvents = 'auto';
-      accordionContent.style.opacity = '1';
-
-      funkMusic.pause();
-      bgMusic.play();
-
-      stopAutoCycle();
-      showInHologram(items[0]); // 기본 첫 아이템 표시
-    }
-  });
+  let madMovieActive = false;
+  let index = 0;
+  let intervalId = null;
 
   const items = [
     "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
@@ -293,10 +270,6 @@
     6: 90,
     8: 180
   };
-
-  let madMovieActive = false;
-  let index = 0;
-  let intervalId = null;
 
   function isRotateYCell(key) {
     return key === "2" || key === "8";
@@ -333,12 +306,10 @@
       const wrap = document.createElement('div');
       wrap.className = 'img-wrap';
 
-      // funk 모드면 회전 애니메이션 제거, funk 흔들림 넣기
       if(madMovieActive){
         wrap.style.animation = 'funkShake 0.5s infinite alternate ease-in-out';
         wrap.classList.remove('rotateY-cw', 'rotateY-ccw', 'rotateX-cw', 'rotateX-ccw');
       } else {
-        // 일반 모드면 회전 애니메이션 붙이기
         wrap.style.animation = '';
         if (isRotateYCell(key)) {
           if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
@@ -381,7 +352,7 @@
         index++;
         if(index >= total) index = 0;
       }, 350);
-    }, useFunk ? 4000 : 1100);
+    }, useFunk ? 2000 : 1100);  // funk 모드 2초 간격으로 변경
   }
 
   function stopAutoCycle() {
@@ -389,9 +360,35 @@
     intervalId = null;
   }
 
+  toggleButton.addEventListener('click', () => {
+    madMovieActive = !madMovieActive;
+    if(madMovieActive) {
+      toggleButton.textContent = 'Mad Movie OFF';
+      accordionContent.style.pointerEvents = 'none';
+      accordionContent.style.opacity = '0.5';
+
+      bgMusic.pause();
+      funkMusic.currentTime = 0;
+      funkMusic.play();
+
+      setTimeout(() => {
+        startAutoCycle(true);
+      }, 1000);  // funk 모드 시작 지연 1초로 변경
+    } else {
+      toggleButton.textContent = 'Mad Movie ON';
+      accordionContent.style.pointerEvents = 'auto';
+      accordionContent.style.opacity = '1';
+
+      funkMusic.pause();
+      bgMusic.play();
+
+      stopAutoCycle();
+      showInHologram(items[0]); // 기본 첫 아이템 표시
+    }
+  });
+
   // 초기 화면 첫 아이템 보여주기
   showInHologram(items[0]);
-
 </script>
 </body>
 </html>
