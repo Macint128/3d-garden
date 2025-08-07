@@ -24,6 +24,7 @@
   h2 {
     margin-bottom: 1rem;
   }
+
   button#toggleMadMovie {
     margin-bottom: 1rem;
     background: #00adb5;
@@ -39,6 +40,7 @@
   button#toggleMadMovie:hover {
     background: #008a99;
   }
+
   .accordion {
     width: 20rem;
     border-radius: 0.5rem;
@@ -92,6 +94,7 @@
     color: black;
     font-weight: bold;
   }
+
   .grid-container {
     perspective: 62.5rem;
   }
@@ -117,23 +120,32 @@
     height: 5rem;
     position: relative;
     transform-style: preserve-3d;
-    animation-duration: 4s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
     transition: filter 0.3s ease;
     filter: none;
   }
   .rotateY-cw {
     animation-name: rotateYAnimCW;
+    animation-duration: 4s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
   }
   .rotateY-ccw {
     animation-name: rotateYAnimCCW;
+    animation-duration: 4s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
   }
   .rotateX-cw {
     animation-name: rotateXAnimCW;
+    animation-duration: 4s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
   }
   .rotateX-ccw {
     animation-name: rotateXAnimCCW;
+    animation-duration: 4s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
   }
   @keyframes rotateXAnimCW {
     from { transform: rotateX(0deg); }
@@ -166,6 +178,7 @@
     transform-origin: center;
     transition: filter 0.3s ease;
   }
+
   /* funk 흔들림 애니메이션 */
   @keyframes funkShake {
     0% { transform: translate(0, 0) rotate(0deg); }
@@ -174,7 +187,8 @@
     75% { transform: translate(-2px, 1px) rotate(-0.5deg); }
     100% { transform: translate(0, 0) rotate(0deg); }
   }
-  /* 글리치 효과 (노이즈 + 흔들림) */
+
+  /* 글리치 효과 */
   @keyframes glitchTranslate {
     0%, 100% { transform: translate(0,0); }
     20% { transform: translate(-2px, 2px); }
@@ -218,8 +232,8 @@
 <script>
   const bgMusic = document.getElementById('bgMusic');
   const funkMusic = document.getElementById('funkMusic');
-  const accordionContent = document.getElementById('accordionContent');
   const toggleButton = document.getElementById('toggleMadMovie');
+  const accordionContent = document.getElementById('accordionContent');
 
   bgMusic.play().catch(() => {});
 
@@ -230,6 +244,33 @@
       console.log('Background music unmuted and playing');
     }
   }, { once: true });
+
+  toggleButton.addEventListener('click', () => {
+    madMovieActive = !madMovieActive;
+    if(madMovieActive) {
+      toggleButton.textContent = 'Mad Movie OFF';
+      accordionContent.style.pointerEvents = 'none';
+      accordionContent.style.opacity = '0.5';
+
+      bgMusic.pause();
+      funkMusic.currentTime = 0;
+      funkMusic.play();
+
+      setTimeout(() => {
+        startAutoCycle(true);
+      }, 1000);
+    } else {
+      toggleButton.textContent = 'Mad Movie ON';
+      accordionContent.style.pointerEvents = 'auto';
+      accordionContent.style.opacity = '1';
+
+      funkMusic.pause();
+      bgMusic.play();
+
+      stopAutoCycle();
+      showInHologram(items[0]); // 기본 첫 아이템 표시
+    }
+  });
 
   const items = [
     "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato",
@@ -253,6 +294,10 @@
     8: 180
   };
 
+  let madMovieActive = false;
+  let index = 0;
+  let intervalId = null;
+
   function isRotateYCell(key) {
     return key === "2" || key === "8";
   }
@@ -266,7 +311,7 @@
     div.className = 'item';
     div.textContent = name;
     div.onclick = () => {
-      if (madMovieActive) return; // 토글 ON일 땐 수동 선택 무시
+      if(madMovieActive) return;
       document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
       div.classList.add('selected');
       showInHologram(name);
@@ -288,12 +333,20 @@
       const wrap = document.createElement('div');
       wrap.className = 'img-wrap';
 
-      if (isRotateYCell(key)) {
-        if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
-        else wrap.classList.add('rotateY-cw');
+      // funk 모드면 회전 애니메이션 제거, funk 흔들림 넣기
+      if(madMovieActive){
+        wrap.style.animation = 'funkShake 0.5s infinite alternate ease-in-out';
+        wrap.classList.remove('rotateY-cw', 'rotateY-ccw', 'rotateX-cw', 'rotateX-ccw');
       } else {
-        if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
-        else wrap.classList.add('rotateX-cw');
+        // 일반 모드면 회전 애니메이션 붙이기
+        wrap.style.animation = '';
+        if (isRotateYCell(key)) {
+          if (isCounterClockwise(key)) wrap.classList.add('rotateY-ccw');
+          else wrap.classList.add('rotateY-cw');
+        } else {
+          if (isCounterClockwise(key)) wrap.classList.add('rotateX-ccw');
+          else wrap.classList.add('rotateX-cw');
+        }
       }
 
       if(glitch) {
@@ -316,41 +369,19 @@
     });
   }
 
-  function applyFunkShake() {
-    Object.values(holoGridCells).forEach(cell => {
-      const wrap = cell.querySelector('.img-wrap');
-      if (!wrap) return;
-      wrap.style.animation = 'funkShake 0.5s infinite alternate ease-in-out';
-    });
-  }
-
-  function removeFunkShake() {
-    Object.values(holoGridCells).forEach(cell => {
-      const wrap = cell.querySelector('.img-wrap');
-      if (!wrap) return;
-      wrap.style.animation = '';
-    });
-  }
-
-  let madMovieActive = false;
-  let index = 0;
-  let intervalId = null;
-
-  function startAutoCycle() {
+  function startAutoCycle(useFunk=false) {
     const total = items.length;
     index = 0;
 
     intervalId = setInterval(() => {
-      showInHologram(items[index % total], true); // 글리치 효과
-      removeFunkShake();
+      showInHologram(items[index % total], true); // glitch on 전환 직후
 
       setTimeout(() => {
         showInHologram(items[index % total], false);
-        applyFunkShake();
         index++;
-        if (index >= total) index = 0;
+        if(index >= total) index = 0;
       }, 350);
-    }, 4000);
+    }, useFunk ? 4000 : 1100);
   }
 
   function stopAutoCycle() {
@@ -358,40 +389,9 @@
     intervalId = null;
   }
 
-  // 초기 첫 아이템 표시
+  // 초기 화면 첫 아이템 보여주기
   showInHologram(items[0]);
 
-  toggleButton.addEventListener('click', () => {
-    madMovieActive = !madMovieActive;
-
-    if (madMovieActive) {
-      toggleButton.textContent = 'Mad Movie OFF';
-      accordionContent.style.pointerEvents = 'none';
-      accordionContent.style.opacity = '0.5';
-
-      bgMusic.pause();
-      funkMusic.currentTime = 0;
-      funkMusic.play();
-
-      stopAutoCycle();
-      setTimeout(() => {
-        startAutoCycle();
-        applyFunkShake();
-      }, 1000); // 1초 대기 후 시작
-
-    } else {
-      toggleButton.textContent = 'Mad Movie ON';
-      accordionContent.style.pointerEvents = 'auto';
-      accordionContent.style.opacity = '1';
-
-      funkMusic.pause();
-      funkMusic.currentTime = 0;
-      removeFunkShake();
-
-      bgMusic.play();
-      stopAutoCycle();
-    }
-  });
 </script>
 </body>
 </html>
